@@ -20,34 +20,36 @@ token_abi = '[{"inputs":[{"internalType":"string","name":"_NAME","type":"string"
 
 # define function to handle events and print to the console
 def handle_event(event):
-    pair = w3.toJSON(event)
-    jload = json.loads(pair)
-    token0 = jload['args']['token0']
-    token1 = jload['args']['token1']
-    txhash = jload['transactionHash']
-    if token0 == wbnb:
-        token = token1
-    if token1 == wbnb:
-        token = token0
-    tx = w3.eth.get_transaction(txhash)
-    fr = tx['from']
-    balance = w3.eth.getBalance(fr)
-    if balance <= 950000000000000000:
-        tcontract = w3.eth.contract(address=token, abi=token_abi)
-        t_name = 'None'
-        try:
-            calltokname = tcontract.functions.name().call()
-            if bool(calltokname) == True:
-                t_name = calltokname
-        except Exception as e:
-            if 'execution reverted' in str(e):
-                pass
-        print('*Token Informations*'+'\n'
-        +'Name : '+str(t_name)+'\n'
-        +'Address : '+str(token)+'\n'
-        +'balance : '+str(w3.fromWei(balance,'ether'))+' BNB'
-        )
-
+    try:
+        pair = w3.toJSON(event)
+        jload = json.loads(pair)
+        token0 = jload['args']['token0']
+        token1 = jload['args']['token1']
+        txhash = jload['transactionHash']
+        if token0 == wbnb:
+            token = token1
+        if token1 == wbnb:
+            token = token0
+        tx = w3.eth.get_transaction(txhash)
+        fr = tx['from']
+        balance = w3.eth.getBalance(fr)
+        if balance <= 950000000000000000:
+            tcontract = w3.eth.contract(address=token, abi=token_abi)
+            t_name = 'None'
+            try:
+                calltokname = tcontract.functions.name().call()
+                if bool(calltokname) == True:
+                    t_name = calltokname
+            except Exception as e:
+                if 'execution reverted' in str(e):
+                    pass
+            print('*Token Informations*'+'\n'
+            +'Name : '+str(t_name)+'\n'
+            +'Address : '+str(token)+'\n'
+            +'balance : '+str(w3.fromWei(balance,'ether'))+' BNB'
+            )
+    except Exception:
+        pass
 async def log_loop(event_filter, poll_interval):
     while True:
         for PairCreated in event_filter.get_new_entries():
