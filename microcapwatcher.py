@@ -3,15 +3,18 @@ import json
 import requests
 from web3 import Web3
 from websockets import connect
+import time
 import sys
-import abi as key
-
+import re
 
 ws_url = 'ws://127.0.0.1:8546'
 rpc_url = 'http://localhost:8545'
 w3 = Web3(Web3.HTTPProvider(rpc_url))
 
-def run():
+#exclude
+exclude = r'0x244AE091Cc6f9A95F42d64B14Aa71d0cC692e312|0xaa8CF065ab44A6E4Eb2B3aBa786530E7F0c7AaE6|0x89A94eef968066A59dfd8444C512aAbe763Be669'
+
+def runme():
     print("*Nanocap watcher ............")
     async def get_event():
         async with connect(ws_url) as ws:
@@ -29,12 +32,17 @@ def run():
                         # filter and process the event data here
                         tx = w3.eth.get_transaction(txHash)
                         data = tx.input
+                        fr = tx['from']
                         reg = r'^0x60a06040'
                         contract = re.findall(reg, data)
                         if contract:
-                            balance = w3.eth.getBalance(tx['from'])
-                            if balance < 950000000000000000:
-                                print('Nanocrot Found :'+key.CRED+'\n'+'https://bscscan.com/tx/'+txHash+key.RESET)
+                            ex = re.findall(exclude, fr)
+                            if ex:
+                                pass
+                            if not ex:
+                                balance = w3.eth.getBalance(fr)
+                                if balance < 950000000000000000:
+                                    print('Microcap found :'+'\n'+'https://bscscan.com/tx/'+txHash)
                 except Exception as e:
                     pass
 
@@ -44,4 +52,4 @@ def run():
     except Exception as e:
         pass
 
-run()
+runme()
